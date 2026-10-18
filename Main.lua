@@ -23,8 +23,8 @@ local check_exploit = (syn and "Synapse") or (KRNL_LOADED and "Krnl") or (isourc
 local plrs = game:GetService("Players")
 local cre = game:GetService("CoreGui")
 local rs = game:GetService("RunService")
-local ts = game:GetService("TweenService")
-local uis = game:GetService("UserInputService")
+local ts = game:GetService("TweenService") 
+local uis = game:GetService("UserInputService") 
 local hs = game:GetService("HttpService")
 local ws = game:GetService("Workspace")
 local plr = plrs.LocalPlayer
@@ -48,20 +48,14 @@ configloaders.__index = configloaders
 watermarks.__index = watermarks
 loaders.__index = loaders
 -- // functions
-utility.connections = {}
-utility.windows = {}
-
-utility.connect = function(signal, callback)
-	local con = signal:Connect(callback)
-	table.insert(utility.connections, con)
-	return con
-end
-
-utility.new = function(instance,properties)
+utility.new = function(instance,properties) 
+	-- // instance
 	local ins = Instance.new(instance)
+	-- // properties setting
 	for property,value in pairs(properties) do
 		ins[property] = value
 	end
+	-- // return
 	return ins
 end
 --
@@ -76,12 +70,13 @@ utility.dragify = function(ins,touse)
 		touse:TweenPosition(UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y),Enum.EasingDirection.Out,Enum.EasingStyle.Quad,0.1,true)
 	end
 	--
-	utility.connect(ins.InputBegan, function(input)
+	ins.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
 			dragStart = input.Position
 			startPos = touse.Position
-			utility.connect(input.Changed, function()
+
+			input.Changed:Connect(function()
 				if input.UserInputState == Enum.UserInputState.End then
 					dragging = false
 				end
@@ -89,13 +84,13 @@ utility.dragify = function(ins,touse)
 		end
 	end)
 	--
-	utility.connect(ins.InputChanged, function(input)
+	ins.InputChanged:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
 			dragInput = input
 		end
 	end)
 	--
-	utility.connect(uis.InputChanged, function(input)
+	uis.InputChanged:Connect(function(input)
 		if input == dragInput and dragging then
 			update(input)
 		end
@@ -156,10 +151,10 @@ function library:new(props)
 		}
 	)
 	--
-	if (check_exploit == "Synapse" and syn.request) then
-		syn.protect_gui(screen)
-	end
-	--
+        if (check_exploit == "Synapse" and syn.request) then
+	syn.protect_gui(screen)
+        end
+	-- 1
 	local outline = utility.new(
 		"Frame",
 		{
@@ -172,7 +167,7 @@ function library:new(props)
 			Parent = screen
 		}
 	)
-	--
+	-- 2
 	local outline2 = utility.new(
 		"Frame",
 		{
@@ -185,7 +180,7 @@ function library:new(props)
 			Parent = outline
 		}
 	)
-	--
+	-- 3
 	local indent = utility.new(
 		"Frame",
 		{
@@ -199,7 +194,7 @@ function library:new(props)
 			Parent = outline2
 		}
 	)
-	--
+	-- 4
 	local main = utility.new(
 		"Frame",
 		{
@@ -224,7 +219,7 @@ function library:new(props)
 			Parent = outline2
 		}
 	)
-	--
+	-- 5
 	local outline3 = utility.new(
 		"Frame",
 		{
@@ -255,7 +250,7 @@ function library:new(props)
 			Parent = title
 		}
 	)
-	--
+	-- 6
 	local holder = utility.new(
 		"Frame",
 		{
@@ -266,7 +261,18 @@ function library:new(props)
 			Parent = main
 		}
 	)
-	--
+	-- 7
+	local holder = utility.new(
+		"Frame",
+		{
+			AnchorPoint = Vector2.new(0.5,0.5),
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1,-6,1,-6),
+			Position = UDim2.new(0.5,0,0.5,0),
+			Parent = main
+		}
+	)
+	-- 8
 	local tabs = utility.new(
 		"Frame",
 		{
@@ -292,7 +298,7 @@ function library:new(props)
 			Parent = holder
 		}
 	)
-	--
+	-- 9
 	local outline4 = utility.new(
 		"Frame",
 		{
@@ -316,7 +322,7 @@ function library:new(props)
 	)
 	--
 	utility.dragify(title,outline)
-	--
+	-- // window tbl
 	window = {
 		["screen"] = screen,
 		["holder"] = holder,
@@ -330,8 +336,6 @@ function library:new(props)
 		["multiboxes"] = {},
 		["buttonboxs"] = {},
 		["colorpickers"] = {},
-		["connections"] = {},
-		["unloaded"] = false,
 		["x"] = true,
 		["y"] = true,
 		["key"] = Enum.KeyCode.RightShift,
@@ -350,13 +354,12 @@ function library:new(props)
 	}
 	--
 	table.insert(window.themeitems["accent"]["BackgroundColor3"],outline)
-	table.insert(utility.windows, window)
 	--
 	local toggled = true
 	local cooldown = false
 	local saved = UDim2.new(0,0,0,0)
 	--
-	utility.connect(uis.InputBegan, function(Input)
+	uis.InputBegan:Connect(function(Input)
 		if Input.UserInputType == Enum.UserInputType.Keyboard then
 			if Input.KeyCode == window.key then
 				if cooldown == false then
@@ -483,7 +486,6 @@ function library:watermark()
 	con = title:GetPropertyChangedSignal("TextBounds"):Connect(function()
 		outline.Size = UDim2.new(0,title.TextBounds.X+20,0,26)
 	end)
-	table.insert(utility.connections, con)
 	--
 	watermark = {
 		["outline"] = outline,
@@ -559,9 +561,9 @@ function library:loader(props)
 			Parent = cre
 		}
 	)
-	if (check_exploit == "Synapse" and syn.request) then
-		syn.protect_gui(screen)
-	end
+        if (check_exploit == "Synapse" and syn.request) then
+	syn.protect_gui(screen)
+        end
 	--
 	local outline = utility.new(
 		"Frame",
@@ -1042,7 +1044,7 @@ function library:page(props)
 	--
 	table.insert(self.pages,page)
 	--
-	utility.connect(button.MouseButton1Down, function()
+	button.MouseButton1Down:Connect(function()
 		if page.open == false then
 			for i,v in pairs(self.pages) do
 				if v ~= page then
@@ -1073,11 +1075,6 @@ function library:page(props)
 	end
 	--
 	self.labels[#self.labels+1] = label
-	--
-	-- > auto-open the first page
-	if #self.pages == 1 then
-		page:openpage()
-	end
 	-- // metatable indexing + return
 	setmetatable(page, pages)
 	return page
@@ -1098,8 +1095,6 @@ function pages:openpage()
 				end
 			end
 		end
-		--
-		page.library:closewindows()
 		--
 		page.page.Visible = true
 		page.open = true
@@ -1493,12 +1488,12 @@ function multisections:section(props)
 	--
 	table.insert(self.mssections,mssection)
 	--
-	utility.connect(button.MouseButton1Down, function()
+	button.MouseButton1Down:Connect(function()
 		if mssection.open == false then
 			for i,v in pairs(self.mssections) do
 				if v ~= mssection then
 					if v.open then
-						v.content.Visible = false
+						v.page.Visible = false
 						v.open = false
 						v.outline.BackgroundColor3 = Color3.fromRGB(31, 31 ,31)
 						v.line.Size = UDim2.new(1,0,0,2)
@@ -1626,7 +1621,7 @@ function sections:toggle(props)
 		["current"] = def
 	}
 	--
-	utility.connect(button.MouseButton1Down, function()
+	button.MouseButton1Down:Connect(function()
 		if toggle.current then
 			toggle.callback(false)
 			toggle.color.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -1750,7 +1745,7 @@ function sections:button(props)
 		}
 	)
 	--
-	utility.connect(buttonpress.MouseButton1Down, function()
+	buttonpress.MouseButton1Down:Connect(function()
 		callback()
 		outline.BorderColor3 = self.library.theme.accent
 		table.insert(self.library.themeitems["accent"]["BorderColor3"],outline)
@@ -1818,7 +1813,7 @@ function sections:slider(props)
 			Size = UDim2.new(1,0,1,0),
 			Parent = outline
 		}
-	)
+	)	
 	--
 	local value = utility.new(
 		"TextLabel",
@@ -1921,7 +1916,7 @@ function sections:slider(props)
 		["callback"] = callback
 	}
 	--
-	local function slideupdate()
+	local function slide()
 		local size = math.clamp(plr:GetMouse().X - slider.color.AbsolutePosition.X ,0 ,slider.color.AbsoluteSize.X)
 		local result = (slider.max - slider.min) / slider.color.AbsoluteSize.X * size + slider.min
 		if slider.rounding then
@@ -1947,20 +1942,20 @@ function sections:slider(props)
 		end
 	end
 	--
-	utility.connect(sliderbutton.MouseButton1Down, function()
+	sliderbutton.MouseButton1Down:Connect(function()
 		slider.holding = true
-		slideupdate()
+		slide()
 		table.insert(self.library.themeitems["accent"]["BorderColor3"],outline)
 		outline.BorderColor3 = self.library.theme.accent
 	end)
 	--
-	utility.connect(uis.InputChanged, function()
+	uis.InputChanged:Connect(function()
 		if slider.holding then
-			slideupdate()
+			slide()
 		end
 	end)
 	--
-	utility.connect(uis.InputEnded, function(Input)
+	uis.InputEnded:Connect(function(Input)
 		if Input.UserInputType.Name == 'MouseButton1' and slider.holding then
 			slider.holding = false
 			outline.BorderColor3 = Color3.fromRGB(12, 12, 12)
@@ -2285,7 +2280,7 @@ function sections:dropdown(props)
 		--
 		if v == dropdown.current then ddoptiontitle.TextColor3 = self.library.theme.accent end
 		--
-		utility.connect(ddoptionbutton.MouseButton1Down, function()
+		ddoptionbutton.MouseButton1Down:Connect(function()
 			optionsholder.Visible = false
 			dropdown.open = false
 			indicator.Text = "+"
@@ -2302,7 +2297,7 @@ function sections:dropdown(props)
 		end)
 	end
 	--
-	utility.connect(dropdownbutton.MouseButton1Down, function()
+	dropdownbutton.MouseButton1Down:Connect(function()
 		dropdown.library:closewindows(dropdown)
 		for i,v in pairs(dropdown.titles) do
 			if v.Text == dropdown.current then
@@ -2544,7 +2539,7 @@ function sections:buttonbox(props)
 		--
 		table.insert(buttonbox.titles,bboptiontitle)
 		--
-		utility.connect(bboptionbutton.MouseButton1Down, function()
+		bboptionbutton.MouseButton1Down:Connect(function()
 			optionsholder.Visible = false
 			buttonbox.open = false
 			indicator.Text = "+"
@@ -2553,7 +2548,7 @@ function sections:buttonbox(props)
 		end)
 	end
 	--
-	utility.connect(buttonboxbutton.MouseButton1Down, function()
+	buttonboxbutton.MouseButton1Down:Connect(function()
 		buttonbox.library:closewindows(buttonbox)
 		optionsholder.Visible = not buttonbox.open
 		buttonbox.open = not buttonbox.open
@@ -2786,7 +2781,7 @@ function sections:multibox(props)
 			Parent = optionsoutline
 		}
 	)
-	-- // multibox tbl
+	-- // dropdown tbl
 	multibox = {
 		["library"] = self.library,
 		["indicator"] = indicator,
@@ -2839,7 +2834,7 @@ function sections:multibox(props)
 		--
 		for c,b in pairs(def) do if v == b then ddoptiontitle.TextColor3 = self.library.theme.accent end end
 		--
-		utility.connect(ddoptionbutton.MouseButton1Down, function()
+		ddoptionbutton.MouseButton1Down:Connect(function()
 			local find = table.find(multibox.current,v)
 			if find == nil then
 				table.insert(multibox.current,v)
@@ -2884,7 +2879,7 @@ function sections:multibox(props)
 		end)
 	end
 	--
-	utility.connect(dropdownbutton.MouseButton1Down, function()
+	dropdownbutton.MouseButton1Down:Connect(function()
 		multibox.library:closewindows(multibox)
 		for i,v in pairs(multibox.titles) do
 			if v.TextColor3 ~= Color3.fromRGB(255,255,255) then
@@ -3085,16 +3080,16 @@ function sections:textbox(props)
 		["callback"] = callback
 	}
 	--
-	utility.connect(button.MouseButton1Down, function()
+	button.MouseButton1Down:Connect(function()
 		tbox:CaptureFocus()
 	end)
 	--
-	utility.connect(tbox.Focused, function()
+	tbox.Focused:Connect(function()
 		outline.BorderColor3 = self.library.theme.accent
 		table.insert(self.library.themeitems["accent"]["BorderColor3"],outline)
 	end)
 	--
-	utility.connect(tbox.FocusLost, function(enterPressed)
+	tbox.FocusLost:Connect(function(enterPressed)
 		textbox.current = tbox.Text
 		callback(tbox.Text)
 		outline.BorderColor3 = Color3.fromRGB(12, 12, 12)
@@ -3281,7 +3276,7 @@ function sections:keybind(props)
 		["callback"] = callback
 	}
 	--
-	utility.connect(button.MouseButton1Down, function()
+	button.MouseButton1Down:Connect(function()
 		if keybind.down == false then
 			outline.BorderColor3 = self.library.theme.accent
 			table.insert(self.library.themeitems["accent"]["BorderColor3"],outline)
@@ -3290,7 +3285,7 @@ function sections:keybind(props)
 		end
 	end)
 	--
-	utility.connect(button.MouseButton2Down, function()
+	button.MouseButton2Down:Connect(function()
 		keybind.down = false
 		keybind.current = {nil,nil}
 		outline.BorderColor3 = Color3.fromRGB(12, 12, 12)
@@ -3313,7 +3308,7 @@ function sections:keybind(props)
 		end
 	end
 	--
-	utility.connect(uis.InputBegan, function(Input)
+	uis.InputBegan:Connect(function(Input)
 		if keybind.down then
 			if Input.UserInputType == Enum.UserInputType.Keyboard then
 				local capd = utility.capatalize(Input.KeyCode.Name)
@@ -3529,7 +3524,7 @@ function sections:colorpicker(props)
 		}
 	)
 	--
-	local outline3 = utility.new(
+	local outline2 = utility.new(
 		"Frame",
 		{
 			BackgroundColor3 = Color3.fromRGB(24, 24, 24),
@@ -3551,7 +3546,7 @@ function sections:colorpicker(props)
 			Size = UDim2.new(1,-2,0,1),
 			Position = UDim2.new(0.5,0,0,0),
 			ZIndex = 5,
-			Parent = outline3
+			Parent = outline2
 		}
 	)
 	--
@@ -3571,7 +3566,7 @@ function sections:colorpicker(props)
 			TextStrokeTransparency = 0,
 			TextXAlignment = "Left",
 			ZIndex = 5,
-			Parent = outline3
+			Parent = outline2
 		}
 	)
 	--
@@ -3586,11 +3581,11 @@ function sections:colorpicker(props)
 			Size = UDim2.new(0.875,0,0,150),
 			Position = UDim2.new(0,5,0,20),
 			ZIndex = 5,
-			Parent = outline3
+			Parent = outline2
 		}
 	)
 	--
-	local svframe = utility.new(
+	local outline3 = utility.new(
 		"Frame",
 		{
 			BackgroundColor3 = Color3.fromHSV(h,1,1),
@@ -3612,7 +3607,7 @@ function sections:colorpicker(props)
 			Size = UDim2.new(1,0,1,0),
 			ZIndex = 5,
 			Image = "rbxassetid://7074305282",
-			Parent = svframe
+			Parent = outline3
 		}
 	)
 	--
@@ -3641,11 +3636,11 @@ function sections:colorpicker(props)
 			Size = UDim2.new(0.05,0,0,150),
 			Position = UDim2.new(1,-5,0,20),
 			ZIndex = 5,
-			Parent = outline3
+			Parent = outline2
 		}
 	)
 	--
-	local hueframe = utility.new(
+	local outline4 = utility.new(
 		"Frame",
 		{
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -3680,7 +3675,7 @@ function sections:colorpicker(props)
 		{
 			Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 4)), ColorSequenceKeypoint.new(0.10, Color3.fromRGB(255, 153, 0)), ColorSequenceKeypoint.new(0.20, Color3.fromRGB(209, 255, 0)), ColorSequenceKeypoint.new(0.30, Color3.fromRGB(55, 255, 0)), ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 255, 102)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 255, 255)), ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 102, 255)), ColorSequenceKeypoint.new(0.70, Color3.fromRGB(51, 0, 255)), ColorSequenceKeypoint.new(0.80, Color3.fromRGB(204, 0, 255)), ColorSequenceKeypoint.new(0.90, Color3.fromRGB(255, 0, 153)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 4))},
 			Rotation = 90,
-			Parent = hueframe
+			Parent = outline4
 		}
 	)
 	--
@@ -3695,7 +3690,7 @@ function sections:colorpicker(props)
 			Size = UDim2.new(0,12,0,6),
 			Position = UDim2.new(0.5,0,h,0),
 			ZIndex = 5,
-			Parent = hueframe
+			Parent = outline4
 		}
 	)
 	--
@@ -3812,21 +3807,21 @@ function sections:colorpicker(props)
 			}
 		)
 		--
-		utility.connect(tbox_button.MouseButton1Down, function()
+		tbox_button.MouseButton1Down:Connect(function()
 			tbox:CaptureFocus()
 		end)
 		--
 		return {textbox_holder,tbox,outline5}
 	end
 	--
-	local red = textbox(outline3,UDim2.new(0,62,0,20),UDim2.new(0,5,0,175))
-	local green = textbox(outline3,UDim2.new(0,62,0,20),UDim2.new(0,5,0,175))
+	local red = textbox(outline2,UDim2.new(0,62,0,20),UDim2.new(0,5,0,175))
+	local green = textbox(outline2,UDim2.new(0,62,0,20),UDim2.new(0,5,0,175))
 	green[1].AnchorPoint = Vector2.new(0.5,0)
 	green[1].Position = UDim2.new(0.5,0,0,175)
-	local blue = textbox(outline3,UDim2.new(0,62,0,20),UDim2.new(0,5,0,175))
+	local blue = textbox(outline2,UDim2.new(0,62,0,20),UDim2.new(0,5,0,175))
 	blue[1].AnchorPoint = Vector2.new(1,0)
 	blue[1].Position = UDim2.new(1,-5,0,175)
-	local hex = textbox(outline3,UDim2.new(1,-10,0,20),UDim2.new(0,5,0,200))
+	local hex = textbox(outline2,UDim2.new(1,-10,0,20),UDim2.new(0,5,0,200))
 	hex[2].Size = UDim2.new(1,-12,1,0)
 	hex[2].TextXAlignment = "Left"
 	-- // colorpicker tbl
@@ -3835,7 +3830,7 @@ function sections:colorpicker(props)
 		["cpholder"] = cpholder,
 		["cpcolor"] = cpcolor,
 		["huecursor"] = huecursor,
-		["svframe"] = svframe,
+		["outline3"] = outline3,
 		["huecursor_inline"] = huecursor_inline,
 		["cpcursor"] = cpcursor,
 		["current"] = def,
@@ -3862,9 +3857,9 @@ function sections:colorpicker(props)
 	updateboxes()
 	--
 	local function movehue()
-		local posy = math.clamp(plr:GetMouse().Y-svframe.AbsolutePosition.Y,0,svframe.AbsoluteSize.Y)
-		local resy = (1/svframe.AbsoluteSize.Y)*posy
-		svframe.BackgroundColor3 = Color3.fromHSV(resy,1,1)
+		local posy = math.clamp(plr:GetMouse().Y-outline3.AbsolutePosition.Y,0,outline3.AbsoluteSize.Y)
+		local resy = (1/outline3.AbsoluteSize.Y)*posy
+		outline3.BackgroundColor3 = Color3.fromHSV(resy,1,1)
 		huecursor_inline.BackgroundColor3 = Color3.fromHSV(resy,1,1)
 		colorpicker.hsv[1] = resy
 		colorpicker.current = Color3.fromHSV(colorpicker.hsv[1],colorpicker.hsv[2],colorpicker.hsv[3])
@@ -3875,8 +3870,8 @@ function sections:colorpicker(props)
 	end
 	--
 	local function movecp()
-		local posx,posy = math.clamp(plr:GetMouse().X-svframe.AbsolutePosition.X,0,svframe.AbsoluteSize.X),math.clamp(plr:GetMouse().Y-svframe.AbsolutePosition.Y,0,svframe.AbsoluteSize.Y)
-		local resx,resy = (1/svframe.AbsoluteSize.X)*posx,(1/svframe.AbsoluteSize.Y)*posy
+		local posx,posy = math.clamp(plr:GetMouse().X-outline3.AbsolutePosition.X,0,outline3.AbsoluteSize.X),math.clamp(plr:GetMouse().Y-outline3.AbsolutePosition.Y,0,outline3.AbsoluteSize.Y)
+		local resx,resy = (1/outline3.AbsoluteSize.X)*posx,(1/outline3.AbsoluteSize.Y)*posy
 		colorpicker.hsv[2] = resx
 		colorpicker.hsv[3] = 1-resy
 		colorpicker.current = Color3.fromHSV(colorpicker.hsv[1],colorpicker.hsv[2],colorpicker.hsv[3])
@@ -3886,23 +3881,23 @@ function sections:colorpicker(props)
 		cpcursor:TweenPosition(UDim2.new(resx,0,resy,0),Enum.EasingDirection.Out,Enum.EasingStyle.Quad,0.15,true)
 	end
 	--
-	utility.connect(button.MouseButton1Down, function()
+	button.MouseButton1Down:Connect(function()
 		self.library:closewindows(colorpicker)
 		cpholder.Visible = not colorpicker.open
 		colorpicker.open = not colorpicker.open
 	end)
 	--
-	utility.connect(huebutton.MouseButton1Down, function()
+	huebutton.MouseButton1Down:Connect(function()
 		colorpicker.hue = true
 		movehue()
 	end)
 	--
-	utility.connect(cpimage.MouseButton1Down, function()
+	cpimage.MouseButton1Down:Connect(function()
 		colorpicker.cp = true
 		movecp()
 	end)
 	--
-	utility.connect(uis.InputChanged, function()
+	uis.InputChanged:Connect(function()
 		if colorpicker.cp then
 			movecp()
 		end
@@ -3911,7 +3906,7 @@ function sections:colorpicker(props)
 		end
 	end)
 	--
-	utility.connect(uis.InputEnded, function(Input)
+	uis.InputEnded:Connect(function(Input)
 		if Input.UserInputType.Name == 'MouseButton1'  then
 			if colorpicker.cp then
 				colorpicker.cp = false
@@ -3922,11 +3917,11 @@ function sections:colorpicker(props)
 		end
 	end)
 	--
-	utility.connect(red[2].Focused, function()
+	red[2].Focused:Connect(function()
 		red[3].BorderColor3 = self.library.theme.accent
 	end)
 	--
-	utility.connect(red[2].FocusLost, function()
+	red[2].FocusLost:Connect(function()
 		local saved = red[2].Text
 		local num = tonumber(saved)
 		if num then
@@ -3947,11 +3942,11 @@ function sections:colorpicker(props)
 		end
 	end)
 	--
-	utility.connect(green[2].Focused, function()
+	green[2].Focused:Connect(function()
 		green[3].BorderColor3 = self.library.theme.accent
 	end)
 	--
-	utility.connect(green[2].FocusLost, function()
+	green[2].FocusLost:Connect(function()
 		local saved = green[2].Text
 		local num = tonumber(saved)
 		if num then
@@ -3972,11 +3967,11 @@ function sections:colorpicker(props)
 		end
 	end)
 	--
-	utility.connect(blue[2].Focused, function()
+	blue[2].Focused:Connect(function()
 		blue[3].BorderColor3 = self.library.theme.accent
 	end)
 	--
-	utility.connect(blue[2].FocusLost, function()
+	blue[2].FocusLost:Connect(function()
 		local saved = blue[2].Text
 		local num = tonumber(saved)
 		if num then
@@ -3997,11 +3992,11 @@ function sections:colorpicker(props)
 		end
 	end)
 	--
-	utility.connect(hex[2].Focused, function()
+	hex[2].Focused:Connect(function()
 		hex[3].BorderColor3 = self.library.theme.accent
 	end)
 	--
-	utility.connect(hex[2].FocusLost, function()
+	hex[2].FocusLost:Connect(function()
 		local saved = hex[2].Text
 		if #saved >= 6 and #saved <= 7 then
 			local e,s = pcall(function()
@@ -4062,7 +4057,7 @@ function colorpickers:set(color)
 		end
 		--
 		local function movehue()
-			colorpicker.svframe.BackgroundColor3 = Color3.fromHSV(h,1,1)
+			colorpicker.outline3.BackgroundColor3 = Color3.fromHSV(h,1,1)
 			colorpicker.huecursor_inline.BackgroundColor3 = Color3.fromHSV(h,1,1)
 			colorpicker.hsv[1] = h
 			colorpicker.current = Color3.fromHSV(colorpicker.hsv[1],colorpicker.hsv[2],colorpicker.hsv[3])
@@ -4290,7 +4285,7 @@ function sections:configloader(props)
 			selected = createdb
 		end
 		--
-		utility.connect(createdbutton.MouseButton1Down, function()
+		createdbutton.MouseButton1Down:Connect(function()
 			for i,v in pairs(createdbuttons) do
 				if v ~= createdb then
 					v.grey.Visible = false
@@ -4489,7 +4484,7 @@ function sections:configloader(props)
 			}
 		)
 		--
-		utility.connect(tbox_button.MouseButton1Down, function()
+		tbox_button.MouseButton1Down:Connect(function()
 			tbox:CaptureFocus()
 		end)
 		--
@@ -4547,11 +4542,11 @@ function sections:configloader(props)
 	--
 	local currentname = nil
 	--
-	utility.connect(name[2].Focused, function()
+	name[2].Focused:Connect(function()
 		name[3].BorderColor3 = self.library.theme.accent
 	end)
 	--
-	utility.connect(name[2].FocusLost, function()
+	name[2].FocusLost:Connect(function()
 		local saved = name[2].Text
 		if #saved >= 3 and #saved <= 15 then
 			currentname = saved
@@ -4562,14 +4557,14 @@ function sections:configloader(props)
 		name[3].BorderColor3 = Color3.fromRGB(12,12,12)
 	end)
 	--
-	utility.connect(load[3].MouseButton1Down, function()
+	load[3].MouseButton1Down:Connect(function()
 		self.library:loadconfig(folder..selected.name..".cfg")
 		load[2].BorderColor3 = self.library.theme.accent
 		wait(0.05)
 		load[2].BorderColor3 = Color3.fromRGB(12,12,12)
 	end)
 	--
-	utility.connect(delete[3].MouseButton1Down, function()
+	delete[3].MouseButton1Down:Connect(function()
 		delfile(folder..selected.name..".cfg")
 		delete[2].BorderColor3 = self.library.theme.accent
 		wait(0.05)
@@ -4578,7 +4573,7 @@ function sections:configloader(props)
 		refresh()
 	end)
 	--
-	utility.connect(save[3].MouseButton1Down, function()
+	save[3].MouseButton1Down:Connect(function()
 		writefile(folder..selected.name..".cfg", self.library:saveconfig())
 		save[2].BorderColor3 = self.library.theme.accent
 		wait(0.05)
@@ -4587,7 +4582,7 @@ function sections:configloader(props)
 		refresh()
 	end)
 	--
-	utility.connect(create[3].MouseButton1Down, function()
+	create[3].MouseButton1Down:Connect(function()
 		writefile(folder..currentname..".cfg", self.library:saveconfig())
 		create[2].BorderColor3 = self.library.theme.accent
 		wait(0.05)
@@ -4603,59 +4598,4 @@ function sections:configloader(props)
 	setmetatable(configloader, configloaders)
 	return configloader 
 end
---
--- >===========================================================
--- > CLEANUP / UNLOAD
--- >===========================================================
-function library:OnUnload(callback)
-	if type(callback) == "function" then
-		self.unloadCallback = callback
-	end
-	return self
-end
-
-function library:unload()
-	if self.unloaded then
-		return
-	end
-	self.unloaded = true
-
-	if type(self.unloadCallback) == "function" then
-		pcall(self.unloadCallback)
-	end
-
-	for _, con in ipairs(utility.connections) do
-		pcall(function() con:Disconnect() end)
-	end
-	table.clear(utility.connections)
-
-	for _, tbl in ipairs({
-		self.pages, self.dropdowns, self.multiboxes,
-		self.buttonboxs, self.colorpickers, self.labels,
-		self.themeitems.accent.BackgroundColor3,
-		self.themeitems.accent.BorderColor3,
-		self.themeitems.accent.TextColor3,
-	}) do
-		table.clear(tbl)
-	end
-
-	if self.screen and self.screen.Parent then
-		self.screen:Destroy()
-	end
-
-	self.screen = nil
-	self.holder = nil
-	self.tabs = nil
-	self.tabsbuttons = nil
-	self.outline = nil
-end
-
-function library.unloadAll()
-	if not utility.windows then return end
-	for _, w in ipairs(utility.windows) do
-		pcall(function() w:unload() end)
-	end
-	table.clear(utility.windows)
-end
-
 return library
