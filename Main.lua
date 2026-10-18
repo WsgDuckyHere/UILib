@@ -1073,21 +1073,6 @@ function library:page(props)
 	if pointer then
 		self.pointers[tostring(pointer)] = page.pointers
 	end
-	--
-		self.labels[#self.labels+1] = label
-	--
-	-- > AUTO OPEN FIRST TAB
-	if #self.pages == 1 then
-		page.page.Visible = true
-		page.open = true
-		page.outline.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-		page.line.Size = UDim2.new(1,0,0,3)
-		page.line.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-	end
-	--
-	-- // metatable indexing + return
-	setmetatable(page, pages)
-	return page
 	-- // metatable indexing + return
 	setmetatable(page, pages)
 	return page
